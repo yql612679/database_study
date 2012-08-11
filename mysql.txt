@@ -1,0 +1,100 @@
+RDBMS 关系数据库管理系统
+
+mysql语法
+//////////////数据类型
+整数类型: TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT (可以有UNSIGNED类型)
+浮点类型：（NUMBERICM, DECIMAL）(准确类型)； (FLOAT, REAL, DOUBLE, PRECISION)近似数字类型
+时间类型：DATE TIME DATETIME TIMESTAMP YEAR（1901-2155）
+字符串类型：CHAR VARCHAR BLOB TEXT ENUM SET ；TEXT是一个大小写不敏感的BLOB， 都有TINY MEDIUM, BIG类型
+
+//////////////
+USE database_name; 						//使用数据库
+DESCRIBE table_name 					//描述表
+SELECT * FROM table_name				//查询表所有项
+
+SHOW DATABASES; 				//显示已有的数据库
+SHOW DATABASES LIKE '%_'; 		//使用通配符%_过滤， '%'匹配多个字符， '_'匹配单个字符
+SHOW TABLES;					//显示数据库中已有的表
+SHOW TABLES LIKE '%_';
+CREATE DATABASE [IF NOT EXISTS] db_name; 			//创建数据库
+DROP DATABASE [IF EXISTS] db_name;					//删除数据库
+===========================================================================================================
+SHOW TABLES [FROM db_name] [LIKE wild]
+SHOW COLUMNS FROM tbl_name [FROM db_name] [LIKE wild]
+SHOW INDEX FROM tbl_name [FROM db_name]
+SHOW TABLE STATUS [FROM db_name] [LIKE wild]
+{DESCRIBE|DESC} tbl_name {col_name|wild}; //类似与SHOW COLUMNS的信息，此语句为了与Oracle兼容提供的
+(SHOW FIELDS是SHOW COLUMNS的同义词, SHOW KEYS是SHOW INDEX的同义词)
+
+/////////创建表
+CREATE TABLE [IF NOT EXISTS] table_name(tiny TINYINT, ...);		 //创建表
+例：CREATE TABLE guestbook(visitor VARCHAR(40), comment TEXT, entrydate DATETIME) {SELECT * FROM tbl_name {WHERE 0}};
+可以在后面跟SELECT从另外一张表中复制或或者复制部分来创建表，可以配合TEMPORARY来使用, WHERE 0(创建空表)
+制定表类型:如 CREATE TEMPORARY TABLE fast(id int, articles Text) ENGINE={HEAP|MYISAM|INNODB等};
+参考 http://www.blogjava.net/coderdream/archive/2007/08/17/137642.html
+1、最简单的：
+CREATE TABLE t1(  
+   id int not null,  
+   name char(20)  
+);  
+2、带主键的：  
+a：  
+CREATE TABLE t1(  
+   id int not null primary key,  
+   name char(20)  
+);  
+b：复合主键  
+CREATE TABLE t1(  
+   id int not null,  
+   name char(20),  
+   primary key (id,name)  
+);  
+3、带默认值的：  
+CREATE TABLE t1(  
+   id int not null default 0 primary key,  
+   name char(20) default '1'  
+);
+/////////////更改表属性
+ALTER TABLE tbl_name ADD col_name type; 				//增加列
+ALTER TABLE tbl_name DROP col_name;						//删除列
+ALTER TABLE tbl_name MODIFY col_name type;				//改变列
+ALTER TABLE tbl_name CHANGE old_col_name col_name type;	//改变列
+ALTER TABLE tbl_name RENAME {TO} new_tbl;				//更改表名
+
+/////////////删除表数据
+DROP TABLE [IF EXISTS] tbl_name [, tbl_name,...]
+
+/////////////插入行数据
+INSERT INTO tbl_name [(col_name, ...)] VALUES(pression,...), ...
+INSERT INTO tbl_name SET col_name=expression, ...
+支持INSERT INTO ... SELECT
+
+//批量录入数据，filename.txt有一定的格式
+LOAD DATA [LOCAL] INFILE 'filename.txt' [REPLACE|IGNORE] INTO TABLE tbl_name
+//创建pet表
+mysql> CREATE TABLE pet (name CHAR(30), owner CHAR(30), species CHAR(10), sex ENUM('m', 'f') NOT NULL, birth DATE, death DATE);
+//加载mysql_test.txt到表pet中
+例子：LOAD DATA LOCAL INFILE 'd:\\test\\mysql_test.txt' REPLACE INTO TABLE pet FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY "\r\n";
+
+//////////////////////查询数据表中的记录
+SELECT语句的语法如下：
+SELECT selection_list  选择哪些列 
+FROM table_list  从何处选择行 
+WHERE primary_constraint  行必须满足什么条件 
+GROUP  BY grouping_columns  怎样对结果分组 
+HAVING secondary_constraint  行必须满足的第二条件 
+ORDER BY sorting_columns [ASC|DESC]怎样对结果排序 (升序|降序)默认为升序。不能对text和image数据类型排序
+LIMIT count  结果限定
+(注意所有使用的关键词必须精确的按以上的顺序给出)
+
+SELECT * FROM tbl_name;
+WHERE可以使用AND OR NOT <=> 等关系运算符
+
+SELECT COUNT(*) FROM tbl_name; 	//查询记录数
+SELECT COUNT(col_name) FROM tbl_name; 	//计算col_name非空的记录数目
+COUNT一般配合GROUP BY使用如：SELECT COUNT(*) FROM tbl_name GROUP BY  col_name; //计算col_name中每一类的个数
+select testbook.visitor, comments from testbook, guestbook where testbook.visitor=guestbook.visitor; //操作两张表
+
+///////////////////////////修改删除记录
+UPDATE tbl_name SET col_name='xxx' where col_name='xxx'
+DELETE FORM tbl_name WHERE col_name='xxx'; 
